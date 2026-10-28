@@ -1,0 +1,26 @@
+name: Publish release
+on:
+  push:
+    tags: ['v[0-9]*']
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Avalanche packages
+        run: make packages
+      - name: Create checksums
+        working-directory: artifacts/debs
+        run: sha256sum ./*.deb > SHA256SUMS
+      - name: Publish packages and release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" artifacts/debs/*.deb artifacts/debs/SHA256SUMS \
+            --verify-tag --title "AvalancheLinux 1.0 Summit" \
+            --notes-file "docs/releases/$RELEASE_TAG.md"
