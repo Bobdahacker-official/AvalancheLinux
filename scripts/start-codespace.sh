@@ -53,18 +53,29 @@ if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
 fi
 vm_pid=''
 web_pid=''
+repair_pid=''
 cleanup() {
+    [ -z "$repair_pid" ] || kill "$repair_pid" 2>/dev/null || true
     [ -z "$web_pid" ] || kill "$web_pid" 2>/dev/null || true
     [ -z "$vm_pid" ] || kill "$vm_pid" 2>/dev/null || true
 }
 trap cleanup EXIT
 trap 'exit 0' INT TERM
+rm -f "$state/guest-agent.sock"
 qemu-system-x86_64 "${acceleration[@]}" -m 2048 -smp 2 \
+    -device virtio-serial-pci \
+    -chardev "socket,path=$state/guest-agent.sock,server=on,wait=off,id=agent" \
+    -device virtserialport,chardev=agent,name=org.qemu.guest_agent.0 \
     -drive "file=$disk,format=qcow2,if=virtio" -cdrom "$iso" \
     "${boot_options[@]}" -device virtio-vga -device usb-ehci -device usb-tablet \
     -nic user,model=virtio-net-pci -display none -vnc 127.0.0.1:1 \
     >"$state/qemu.log" 2>&1 &
 vm_pid=$!
+if [ "${1:-}" = '--recover-login' ]; then
+    python3 "$root/scripts/repair-live-login.py" "$state/guest-agent.sock" >"$state/repair.log" 2>&1 &
+    repair_pid=$!
+    echo "Live account repair progress: $state/repair.log"
+fi
 websockify --web=/usr/share/novnc 6080 127.0.0.1:5901 \
     >"$state/novnc.log" 2>&1 &
 web_pid=$!
