@@ -1,5 +1,8 @@
 name: Update release notes
 on:
+  workflow_run:
+    workflows: ['Build Avalanche release']
+    types: [completed]
   push:
     paths:
       - docs/releases/v1.0.0.md
@@ -10,6 +13,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - env:
           GH_TOKEN: ${{ github.token }}
         run: gh release edit v1.0.0 --notes-file docs/releases/v1.0.0.md
