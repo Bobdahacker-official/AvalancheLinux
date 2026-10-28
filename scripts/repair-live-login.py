@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Repair the running live VM through its local guest-agent socket."""
 import json
+import base64
 import socket
 import sys
 import time
 
 path = sys.argv[1]
 deadline = time.monotonic() + 600
+last_error = None
 command = """set -eu
 test -d /run/live/medium || test -d /lib/live/mount/medium
 id avalanche >/dev/null
@@ -50,10 +52,15 @@ while time.monotonic() < deadline:
                         if status.get('exitcode') == 0:
                             print('Login repaired inside the running VM. Refresh noVNC. Username: avalanche; password: live.', flush=True)
                             sys.exit(0)
+                        detail = base64.b64decode(status.get('err-data', '')).decode(errors='replace').strip()
+                        raise OSError('Guest repair exited %s: %s' % (status.get('exitcode'), detail or 'a live-system prerequisite failed'))
                         break
                     time.sleep(1)
-    except (OSError, ValueError):
-        pass
+    except (OSError, ValueError) as error:
+        message = str(error)
+        if message != last_error:
+            print('Diagnostic: ' + message, flush=True)
+            last_error = message
     time.sleep(5)
 print('Repair could not reach the live desktop. Share artifacts/codespace/qemu.log and repair.log.', flush=True)
 sys.exit(1)
