@@ -1,6 +1,7 @@
 # Core live system and desktop
 live-boot
 live-config
+user-setup
 live-config-systemd
 systemd-sysv
 linux-image-amd64

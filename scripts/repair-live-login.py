@@ -11,8 +11,11 @@ deadline = time.monotonic() + 600
 last_error = None
 command = """set -eu
 test -d /run/live/medium || test -d /lib/live/mount/medium
-id avalanche >/dev/null
 systemctl is-active --quiet lightdm
+if ! id avalanche >/dev/null 2>&1; then
+    useradd -m -s /bin/bash avalanche
+fi
+usermod -aG sudo avalanche
 printf 'avalanche:live\\n' | chpasswd
 passwd -u avalanche >/dev/null 2>&1 || true
 chage -E -1 -M 99999 avalanche
