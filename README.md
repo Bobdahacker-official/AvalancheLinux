@@ -4,12 +4,12 @@ AvalancheLinux is a lightweight Linux desktop built on Debian 13 and Xfce. It ad
 
 ## Download
 
-Get the desktop and installer packages from [Releases](https://github.com/Bobdahacker-official/AvalancheLinux/releases).
+Get the bootable ISO from [Releases](https://github.com/Bobdahacker-official/AvalancheLinux/releases). Write it to a USB drive to start AvalancheLinux and install it on your computer.
 
 - **avalanche-core** includes Avalanche Center, Software, Updates, Settings, the desktop session, and the `avalanche` command.
 - **avalanche-installer** includes the graphical installer workflow, product screens, and desktop launcher. Use it when building an Avalanche live image.
 
-The release contains packages and source. Build the current source to create a live image with the Avalanche applications. The earlier base image predates these applications.
+The ISO includes the Avalanche applications and graphical installer. The separate packages are also available for developers and existing installations.
 
 ## Install the desktop applications
 
