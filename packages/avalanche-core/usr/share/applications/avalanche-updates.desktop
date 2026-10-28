@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Avalanche Updates
+Exec=avalanche-center --page updates
+Icon=avalanche
+Categories=System;Settings;
+StartupNotify=true

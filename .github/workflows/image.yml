@@ -1,0 +1,24 @@
+name: Build Avalanche release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    container:
+      image: debian:trixie-slim
+      options: --privileged
+    steps:
+      - name: Install image tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates live-build debootstrap xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin mtools dosfstools squashfs-tools python3 make
+      - uses: actions/checkout@v4
+      - run: make build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AvalancheLinux-release
+          path: artifacts/
+          if-no-files-found: error

@@ -1,0 +1,180 @@
+#!/usr/bin/python3
+"""Avalanche's native desktop hub, curated software browser and update launcher."""
+import argparse
+import json
+import shlex
+import subprocess
+import threading
+from pathlib import Path
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib, Gdk
+
+CATALOG = json.loads(Path('/usr/share/avalanche/catalog.json').read_text())
+
+
+def launch(argv):
+    try:
+        subprocess.Popen(argv)
+    except OSError as error:
+        dialog = Gtk.MessageDialog(message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.CLOSE, text='Avalanche could not open this tool')
+        dialog.format_secondary_text(str(error))
+        dialog.run()
+        dialog.destroy()
+
+
+def transaction(argv):
+    launch(['xfce4-terminal', '--title=Avalanche Software', '--hold', '--command', shlex.join(argv)])
+
+
+class Center(Gtk.Window):
+    def __init__(self, page):
+        super().__init__(title='Avalanche Center')
+        self.set_default_size(900, 620)
+        css = Gtk.CssProvider()
+        css.load_from_data(b"window { background: #102231; color: #eef8fb; } headerbar { background: #0b1826; color: #eef8fb; } label { color: #eef8fb; } button { background: #235568; color: white; border-color: #35758a; border-radius: 7px; padding: 9px; } entry { background: #173345; color: white; } list, row { background: #173345; } row { border-bottom: 1px solid #285064; }")
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.set_border_width(20)
+        self.connect('destroy', Gtk.main_quit)
+        header = Gtk.HeaderBar(title='Avalanche', subtitle='Your desktop. Your software. Your system.')
+        header.set_show_close_button(True)
+        self.set_titlebar(header)
+        self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
+        switcher = Gtk.StackSwitcher(stack=self.stack, halign=Gtk.Align.CENTER)
+        layout = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
+        layout.pack_start(switcher, False, False, 0)
+        layout.pack_start(self.stack, True, True, 0)
+        self.add(layout)
+        self.welcome()
+        self.software()
+        self.settings()
+        self.updates()
+        self.stack.set_visible_child_name(page)
+        self.show_all()
+
+    def button(self, box, title, action):
+        button = Gtk.Button(label=title)
+        button.connect('clicked', lambda _: action())
+        box.pack_start(button, False, False, 0)
+        return button
+
+    def page(self, key, title):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        self.stack.add_titled(box, key, title)
+        return box
+
+    def label(self, box, text):
+        label = Gtk.Label(label=text, xalign=0, wrap=True)
+        label.set_selectable(True)
+        box.pack_start(label, False, False, 0)
+
+    def welcome(self):
+        box = self.page('welcome', 'Home')
+        self.label(box, 'Welcome to AvalancheLinux 1.0 Summit')
+        self.label(box, 'A focused desktop with tools for work, creativity and everyday life. Start with a software collection, connect your devices, or personalize your workspace.')
+        self.button(box, 'Explore Avalanche Software', lambda: self.stack.set_visible_child_name('software'))
+        self.button(box, 'Personalize this computer', lambda: self.stack.set_visible_child_name('settings'))
+        if Path('/run/live/medium/live/filesystem.squashfs').exists():
+            self.button(box, 'Install AvalancheLinux', lambda: launch(['avalanche-install']))
+        self.button(box, 'Open your files', lambda: launch(['thunar']))
+        self.button(box, 'Open Avalanche Terminal', lambda: launch(['xfce4-terminal', '--title=Avalanche Terminal']))
+        self.label(box, 'Terminal essentials: avalanche collections · avalanche install @office · avalanche upgrade · avalanche doctor')
+
+    def software(self):
+        box = self.page('software', 'Software')
+        self.label(box, 'Choose a collection. Avalanche resolves its packages and presents the transaction before installation.')
+        entry = Gtk.SearchEntry(placeholder_text='Search selected applications and collections')
+        box.pack_start(entry, False, False, 0)
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        rows = Gtk.ListBox(selection_mode=Gtk.SelectionMode.NONE)
+        scroll.add(rows)
+        box.pack_start(scroll, True, True, 0)
+        for item in CATALOG:
+            row = Gtk.ListBoxRow()
+            row.search_text = ' '.join([item['name'], item['category'], item['summary']]).lower()
+            content = Gtk.Box(spacing=16, border_width=12)
+            text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+            text.pack_start(Gtk.Label(label=f"{item['name']} · {item['category']}", xalign=0), False, False, 0)
+            description = Gtk.Label(label=item['summary'], xalign=0, wrap=True)
+            text.pack_start(description, False, False, 0)
+            content.pack_start(text, True, True, 0)
+            installed = all(subprocess.run(['dpkg-query', '-W', '-f=${Status}', name], capture_output=True, text=True).stdout == 'install ok installed' for name in item['packages'])
+            button = Gtk.Button(label='Installed' if installed else 'Install')
+            button.set_sensitive(not installed)
+            button.connect('clicked', lambda _, ident=item['id']: transaction(['avalanche', 'install', '@' + ident]))
+            content.pack_end(button, False, False, 0)
+            row.add(content)
+            rows.add(row)
+        rows.set_filter_func(lambda row: entry.get_text().lower() in row.search_text)
+        entry.connect('search-changed', lambda _: rows.invalidate_filter())
+        self.archive_status = Gtk.Label(label='Search the full archive to install individual packages.', xalign=0, wrap=True)
+        box.pack_start(self.archive_status, False, False, 0)
+        self.button(box, 'Search full package archive', lambda: self.archive_search(entry, rows))
+
+    def archive_search(self, entry, rows):
+        query = entry.get_text().strip()
+        if len(query) < 2:
+            self.archive_status.set_text('Enter at least two characters to search the archive.')
+            return
+        self.archive_status.set_text('Searching package information…')
+        def work():
+            result = subprocess.run(['apt-cache', 'search', '--names-only', '--', query], capture_output=True, text=True)
+            installed = subprocess.run(['dpkg-query', '-W', '-f=${binary:Package} ${db:Status-Status}\n'], capture_output=True, text=True)
+            names = {line.split()[0].split(':')[0] for line in installed.stdout.splitlines() if line.endswith(' installed')}
+            matches = [line.partition(' - ') for line in result.stdout.splitlines()][:80]
+            def show():
+                if entry.get_text().strip() != query:
+                    return
+                for row in rows.get_children():
+                    if getattr(row, 'is_archive', False):
+                        rows.remove(row)
+                for name, _, summary in matches:
+                    row = Gtk.ListBoxRow()
+                    row.is_archive = True
+                    row.search_text = (name + ' ' + summary).lower()
+                    content = Gtk.Box(spacing=12, border_width=12)
+                    description = Gtk.Label(label=name + '\n' + summary[:180], xalign=0, wrap=True)
+                    content.pack_start(description, True, True, 0)
+                    button = Gtk.Button(label='Installed' if name in names else 'Install')
+                    button.set_sensitive(name not in names)
+                    button.connect('clicked', lambda _, package=name: transaction(['avalanche', 'install', package]))
+                    content.pack_end(button, False, False, 0)
+                    row.add(content)
+                    rows.add(row)
+                rows.show_all()
+                # Archive matching uses APT's query syntax; show all returned matches.
+                rows.set_filter_func(lambda row: getattr(row, 'is_archive', False) or entry.get_text().lower() in row.search_text)
+                self.archive_status.set_text(result.stderr.strip() if result.returncode else f'{len(matches)} archive matches shown. Narrow the search for more specific results.')
+            GLib.idle_add(show)
+        threading.Thread(target=work, daemon=True).start()
+
+    def settings(self):
+        box = self.page('settings', 'System')
+        for title, command in [('Display and monitors', ['xfce4-display-settings']), ('Wi-Fi and network profiles', ['nm-connection-editor']), ('Sound and microphones', ['pavucontrol']), ('Power and battery', ['xfce4-power-manager-settings']), ('Desktop appearance', ['xfce4-appearance-settings']), ('Keyboard and shortcuts', ['xfce4-keyboard-settings'])]:
+            self.button(box, title, lambda cmd=command: launch(cmd))
+        self.status = Gtk.Label(label='Run a health check for package consistency, networking and the display manager.', xalign=0, wrap=True, selectable=True)
+        box.pack_start(self.status, False, False, 0)
+        self.button(box, 'Check system health', self.health)
+
+    def health(self):
+        self.status.set_text('Checking system…')
+        def work():
+            result = subprocess.run(['avalanche', 'doctor'], capture_output=True, text=True)
+            GLib.idle_add(self.status.set_text, result.stdout + result.stderr)
+        threading.Thread(target=work, daemon=True).start()
+
+    def updates(self):
+        box = self.page('updates', 'Updates')
+        self.label(box, 'Keep Avalanche current')
+        self.label(box, 'Refresh the signed package index and review available system updates. You approve the package transaction in the terminal before changes are installed.')
+        self.button(box, 'Refresh and update this computer', lambda: transaction(['avalanche', 'upgrade']))
+        self.button(box, 'Refresh package information only', lambda: transaction(['avalanche', 'update']))
+        self.button(box, 'Open full package manager', lambda: launch(['synaptic-pkexec']))
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--page', choices=['welcome', 'software', 'settings', 'updates'], default='welcome')
+args = parser.parse_args()
+Center(args.page)
+Gtk.main()

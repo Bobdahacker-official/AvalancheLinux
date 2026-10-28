@@ -1,0 +1,13 @@
+#!/bin/sh
+# Apply the Summit background once per account, including named display outputs.
+set -eu
+marker="$HOME/.config/avalanche/desktop-initialized"
+[ ! -f "$marker" ] || exit 0
+sleep 2
+for monitor in $(xrandr --query | awk '$2 == "connected" {print $1}'); do
+  property="/backdrop/screen0/monitor${monitor}/workspace0/last-image"
+  xfconf-query -c xfce4-desktop -p "$property" -n -t string -s /usr/share/backgrounds/avalanche/summit.svg
+  xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitor${monitor}/workspace0/image-style" -n -t int -s 5
+done
+mkdir -p "$(dirname "$marker")"
+touch "$marker"

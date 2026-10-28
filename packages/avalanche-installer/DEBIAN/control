@@ -1,0 +1,9 @@
+Package: avalanche-installer
+Version: 1.0-1
+Architecture: all
+Maintainer: AvalancheLinux Project
+Depends: avalanche-core, calamares, qml6-module-qtquick, qml6-module-qtquick-window, qml6-module-qtqml-workerscript, pkexec, rsync, squashfs-tools, grub2-common, grub-pc-bin, grub-efi-amd64-bin, efibootmgr, cryptsetup, cryptsetup-initramfs, keyutils, btrfs-progs, xfsprogs, dosfstools, e2fsprogs, initramfs-tools, locales, tzdata
+Section: admin
+Priority: optional
+Description: AvalancheLinux graphical installer
+ Avalanche installation workflow, product branding and desktop launcher.

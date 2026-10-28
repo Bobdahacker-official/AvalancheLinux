@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Avalanche Welcome
+Exec=avalanche-welcome
+OnlyShowIn=XFCE;
+NoDisplay=true

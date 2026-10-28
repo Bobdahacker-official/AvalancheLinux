@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+# This runs in the installed target after the live packages are removed.
+rm -f /etc/sudoers.d/live /etc/sudoers.d/10-live
+rm -f /etc/lightdm/lightdm.conf.d/99-live-config.conf
+if [ -s /etc/crypttab ] && grep -qv '^\s*#\|^\s*$' /etc/crypttab; then
+    printf 'GRUB_ENABLE_CRYPTODISK=y\n' > /etc/default/grub.d/60-avalanche-encryption.cfg
+    printf 'UMASK=0077\n' > /etc/initramfs-tools/conf.d/avalanche-permissions
+fi
+systemctl enable NetworkManager.service lightdm.service
+systemctl set-default graphical.target

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Avalanche Desktop
+Comment=The AvalancheLinux desktop workspace
+Exec=startavalanche
+TryExec=startavalanche
+Type=Application
+DesktopNames=XFCE

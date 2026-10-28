@@ -1,0 +1,7 @@
+/build/
+/artifacts/
+*.iso
+*.img
+*.log
+__pycache__/
+/config/packages.chroot/*.deb

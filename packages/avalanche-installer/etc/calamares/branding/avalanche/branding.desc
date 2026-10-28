@@ -1,0 +1,29 @@
+componentName: avalanche
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 1000px,650px
+windowPlacement: center
+strings:
+  productName: AvalancheLinux
+  shortProductName: Avalanche
+  version: "1.0"
+  shortVersion: "1.0"
+  versionedName: AvalancheLinux 1.0 Summit
+  shortVersionedName: Avalanche 1.0
+  bootloaderEntryName: AvalancheLinux
+  productUrl: https://github.com/Bobdahacker-official/AvalancheLinux
+  supportUrl: https://github.com/Bobdahacker-official/AvalancheLinux/issues
+  knownIssuesUrl: https://github.com/Bobdahacker-official/AvalancheLinux/issues
+  releaseNotesUrl: https://github.com/Bobdahacker-official/AvalancheLinux/blob/main/README.md
+images:
+  productLogo: avalanche.svg
+  productIcon: avalanche.svg
+  productWelcome: avalanche.svg
+slideshow: show.qml
+slideshowAPI: 2
+style:
+  SidebarBackground: "#0b2031"
+  SidebarText: "#e7f6fa"
+  SidebarTextCurrent: "#ffffff"
+  SidebarBackgroundCurrent: "#276576"

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs><linearGradient id="sky" x2="1" y2="1"><stop stop-color="#081321"/><stop offset="1" stop-color="#16485b"/></linearGradient></defs>
+<path fill="url(#sky)" d="M0 0h1920v1080H0z"/>
+<path fill="#18364b" d="M0 900 480 280 960 900 1400 390 1920 920v160H0z"/>
+<path fill="#e5f4f5" d="m480 280-150 194 122-50 70 72 35-63 74 42zM1400 390l-115 134 100-34 65 62 31-39 51 36z"/>
+<path fill="#0a2234" d="M0 1080 730 570 1100 990 1540 720 1920 1080z"/>
+<text x="100" y="915" fill="#edf7fa" font-family="sans-serif" font-size="64" letter-spacing="3">AVALANCHE</text>
+<text x="104" y="960" fill="#9cc5d3" font-family="sans-serif" font-size="23" letter-spacing="6">LINUX · SUMMIT</text>
+</svg>

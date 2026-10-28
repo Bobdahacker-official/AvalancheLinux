@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+lb config noauto \
+  --mode debian \
+  --distribution trixie \
+  --architectures amd64 \
+  --binary-images iso-hybrid \
+  --archive-areas 'main contrib non-free non-free-firmware' \
+  --parent-mirror-bootstrap http://deb.debian.org/debian \
+  --parent-mirror-chroot http://deb.debian.org/debian \
+  --parent-mirror-chroot-security http://security.debian.org/debian-security \
+  --parent-mirror-binary https://deb.debian.org/debian \
+  --parent-mirror-binary-security https://security.debian.org/debian-security \
+  --parent-mirror-debian-installer http://deb.debian.org/debian \
+  --mirror-debian-installer http://deb.debian.org/debian \
+  --mirror-bootstrap http://deb.debian.org/debian \
+  --mirror-chroot http://deb.debian.org/debian \
+  --mirror-binary https://deb.debian.org/debian \
+  --mirror-chroot-security http://security.debian.org/debian-security \
+  --mirror-binary-security https://security.debian.org/debian-security \
+  --security true \
+  --updates true \
+  --apt-recommends false \
+  --apt-secure true \
+  --linux-packages linux-image \
+  --linux-flavours amd64 \
+  --debian-installer false \
+  --bootappend-live 'boot=live components username=avalanche user-fullname=AvalancheLinux hostname=avalanche locales=en_US.UTF-8 keyboard-layouts=us console=tty0 console=ttyS0,115200n8' \
+  --iso-application AvalancheLinux \
+  --iso-publisher AvalancheLinux \
+  --iso-volume AVALANCHE_1 \
+  --image-name avalanchelinux-1.0 \
+  "$@"

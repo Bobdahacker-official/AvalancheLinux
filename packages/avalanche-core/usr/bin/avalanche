@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+"""Avalanche's system command. Package transactions use the authenticated APT archive."""
+import argparse
+import json
+import os
+import platform
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+CATALOG = Path('/usr/share/avalanche/catalog.json')
+
+
+def catalog():
+    return json.loads(CATALOG.read_text())
+
+
+def run(command, privileged=False):
+    if privileged and os.geteuid() != 0:
+        command = ['sudo', '--', *command]
+    return subprocess.call(command)
+
+
+def expand(names):
+    bundles = {item['id']: item['packages'] for item in catalog()}
+    result = []
+    for name in names:
+        if name.startswith('@'):
+            if name[1:] not in bundles:
+                raise ValueError(f'Unknown collection {name}; use avalanche collections')
+            result.extend(bundles[name[1:]])
+        elif re.fullmatch(r'[a-z0-9][a-z0-9+.-]*(?::[a-z0-9-]+)?', name):
+            result.append(name)
+        else:
+            raise ValueError(f'Invalid package name: {name}')
+    return list(dict.fromkeys(result))
+
+
+def doctor():
+    print(f'AvalancheLinux · {platform.release()} · {platform.machine()}')
+    print(f'Computer: {platform.node()}')
+    disk = shutil.disk_usage('/')
+    print(f'Root disk: {disk.free // 2**30} GiB free of {disk.total // 2**30} GiB')
+    failed = False
+    for service in ['NetworkManager', 'lightdm']:
+        status = subprocess.run(['systemctl', 'is-active', service], capture_output=True, text=True)
+        print(f'{service}: {status.stdout.strip()}')
+        failed |= status.returncode != 0
+    result = subprocess.run(['dpkg', '--audit'], capture_output=True, text=True)
+    print('Packages: ' + (result.stdout.strip() or 'package database is consistent'))
+    failed |= bool(result.stdout.strip()) or result.returncode != 0
+    return int(failed)
+
+
+def main():
+    parser = argparse.ArgumentParser(prog='avalanche', description='AvalancheLinux package and system management')
+    commands = parser.add_subparsers(dest='command', required=True)
+    for name in ['update', 'upgrade', 'doctor', 'about', 'collections', 'list', 'welcome', 'software', 'settings']:
+        commands.add_parser(name)
+    for name in ['install', 'remove', 'info']:
+        commands.add_parser(name).add_argument('packages', nargs='+')
+    commands.add_parser('search').add_argument('query')
+    args = parser.parse_args()
+    if args.command == 'collections':
+        for item in catalog():
+            print(f"@{item['id']:<14} {item['name']} — {item['summary']}")
+        return 0
+    if args.command == 'about':
+        print('AvalancheLinux 1.0 Summit\nAvalanche desktop, software collections and system tools.\nPackage engine: APT; upstream compatibility: Debian 13 (trixie).')
+        return 0
+    if args.command == 'list':
+        return run(['dpkg-query', '-W', '-f=${binary:Package}\t${Version}\n'])
+    if args.command == 'doctor':
+        return doctor()
+    if args.command in ['welcome', 'software', 'settings']:
+        return run(['avalanche-center', '--page', args.command])
+    if args.command == 'update':
+        return run(['apt-get', 'update'], True)
+    if args.command == 'upgrade':
+        result = run(['apt-get', 'update'], True)
+        return result or run(['apt-get', 'upgrade'], True)
+    if args.command == 'search':
+        return run(['apt-cache', 'search', '--', args.query])
+    packages = expand(args.packages)
+    if args.command == 'info':
+        return run(['apt-cache', 'show', '--', *packages])
+    return run(['apt-get', args.command, '--', *packages], True)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (ValueError, FileNotFoundError) as error:
+        print(f'avalanche: {error}', file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        sys.exit(130)

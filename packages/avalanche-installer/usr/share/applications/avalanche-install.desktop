@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install AvalancheLinux
+Comment=Install AvalancheLinux on this computer
+Exec=avalanche-install
+Icon=system-software-install
+Categories=System;
+StartupNotify=true

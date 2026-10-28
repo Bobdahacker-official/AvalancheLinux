@@ -1,0 +1,10 @@
+Package: avalanche-core
+Version: 1.0-1
+Architecture: all
+Maintainer: AvalancheLinux Project
+Depends: python3, python3-gi, gir1.2-gtk-3.0, python3-apt, apt, sudo, xfce4-session, xfce4-terminal, polkitd, pkexec, network-manager-gnome, pavucontrol, thunar, xfce4-settings, xfce4-power-manager, synaptic
+Section: admin
+Priority: optional
+Description: Avalanche desktop applications and system management
+ Avalanche Center, Software, Updates, diagnostics, application bundles,
+ and the avalanche system management command.

@@ -1,0 +1,11 @@
+label live-@FLAVOUR@
+  menu label ^Start AvalancheLinux
+  menu default
+  linux @LINUX@
+  initrd @INITRD@
+  append @APPEND_LIVE@
+label live-@FLAVOUR@-failsafe
+  menu label AvalancheLinux (^safe graphics)
+  linux @LINUX@
+  initrd @INITRD@
+  append @APPEND_LIVE@ nomodeset

@@ -1,0 +1,11 @@
+[
+ {"id":"browser","name":"Firefox","category":"Internet","summary":"Private browsing with Firefox ESR.","packages":["firefox-esr"]},
+ {"id":"office","name":"Office Suite","category":"Work","summary":"Documents, spreadsheets and presentations with LibreOffice.","packages":["libreoffice","hunspell-en-us"]},
+ {"id":"creative","name":"Creative Studio","category":"Creative","summary":"Photo editing and vector illustration with GIMP and Inkscape.","packages":["gimp","inkscape"]},
+ {"id":"media","name":"Media Player","category":"Media","summary":"Play local movies, music and network streams with VLC.","packages":["vlc"]},
+ {"id":"development","name":"Developer Tools","category":"Development","summary":"Native compiler, Git, Python virtual environments and debugger.","packages":["build-essential","git","python3-venv","gdb"]},
+ {"id":"backup","name":"Backups","category":"System","summary":"Scheduled, encrypted backups with Déjà Dup.","packages":["deja-dup"]},
+ {"id":"passwords","name":"Password Safe","category":"Security","summary":"Manage encrypted password databases with KeePassXC.","packages":["keepassxc"]},
+ {"id":"mail","name":"Mail and Calendar","category":"Internet","summary":"Email, calendars and contacts with Thunderbird.","packages":["thunderbird"]},
+ {"id":"games","name":"Game Tools","category":"Games","summary":"Manage native and Windows game libraries with Lutris.","packages":["lutris"]}
+]

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Avalanche Settings
+Exec=avalanche-center --page settings
+Icon=avalanche
+Categories=System;Settings;
+StartupNotify=true

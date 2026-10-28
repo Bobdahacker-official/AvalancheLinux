@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Avalanche Desktop
+Exec=/usr/local/bin/avalanche-desktop
+OnlyShowIn=XFCE;
+NoDisplay=true

@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+# Keep the derivative identity across Debian base-files upgrades.
+dpkg-divert --local --add --rename --divert /usr/lib/os-release.debian /usr/lib/os-release
+printf 'avalanche\n' > /etc/hostname
+printf '127.0.0.1 localhost\n127.0.1.1 avalanche\n::1 localhost ip6-localhost ip6-loopback\n' > /etc/hosts
+cat > /etc/os-release <<'RELEASE'
+PRETTY_NAME="AvalancheLinux 1.0"
+NAME="AvalancheLinux"
+VERSION_ID="1.0"
+VERSION="1.0 (Summit)"
+VERSION_CODENAME=trixie
+ID=avalanche
+ID_LIKE=debian
+DEBIAN_CODENAME=trixie
+RELEASE
+printf 'AvalancheLinux 1.0 \\n \\l\n' > /etc/issue
+printf 'AvalancheLinux 1.0\n' > /etc/issue.net
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/50-avalanche.conf <<'LIGHTDM'
+[Seat:*]
+user-session=avalanche
+LIGHTDM
+systemctl enable NetworkManager.service lightdm.service
+systemctl set-default graphical.target
+# No build-host credentials, proxy configuration, or machine identity in the ISO.
+rm -f /etc/machine-id /var/lib/dbus/machine-id
+: > /etc/machine-id
+apt-get clean
