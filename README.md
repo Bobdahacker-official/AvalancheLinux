@@ -63,7 +63,7 @@ Install `make` and `dpkg` on a Linux build host, then run:
 make packages
 ```
 
-The two `.deb` files are written to `artifacts/debs/`. Application and installer source is in [packages](packages/).
+The two `.deb` files are written to `artifacts/debs/`. Application and installer source is in [src](src/). Build and recovery tools are in [scripts](scripts/); live-image settings are in [config](config/) and [auto](auto/).
 
 ## Build a live image
 

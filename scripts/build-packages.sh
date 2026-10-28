@@ -5,7 +5,7 @@ mkdir -p "$root/artifacts/debs"
 staging=$(mktemp -d)
 trap 'rm -rf "$staging"' EXIT HUP INT TERM
 for package in avalanche-core avalanche-installer; do
-  cp -a "$root/packages/$package" "$staging/$package"
+  cp -a "$root/src/$package" "$staging/$package"
   mkdir -p "$staging/$package/usr/share/doc/$package"
   cp "$root/LICENSE" "$staging/$package/usr/share/doc/$package/copyright"
   find "$staging/$package" -type d -name __pycache__ -prune -exec rm -rf '{}' +
