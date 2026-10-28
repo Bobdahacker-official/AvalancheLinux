@@ -1,8 +1,11 @@
 name: Build Avalanche release
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/image.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   image:
     runs-on: ubuntu-24.04
@@ -14,9 +17,16 @@ jobs:
       - name: Install image tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends git ca-certificates live-build debootstrap xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin mtools dosfstools squashfs-tools python3 make
+          apt-get install -y --no-install-recommends git gh ca-certificates live-build debootstrap xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin mtools dosfstools squashfs-tools python3 make
       - uses: actions/checkout@v4
       - run: make build
+      - name: Publish bootable image
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release upload v1.0.0 artifacts/*.iso artifacts/*.packages artifacts/SHA256SUMS --clobber
+          gh release edit v1.0.0 --notes-file docs/releases/v1.0.0.md
       - uses: actions/upload-artifact@v4
         with:
           name: AvalancheLinux-release
