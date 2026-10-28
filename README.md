@@ -4,6 +4,12 @@ AvalancheLinux is a lightweight Linux desktop built on Debian 13 and Xfce. It ad
 
 ## Download
 
+### Try it in GitHub Codespaces
+
+Run `git pull --ff-only && bash scripts/start-codespace.sh` in the Codespace terminal. Open the link it prints to use the AvalancheLinux desktop in your browser. Keep the terminal open and port 6080 private. The first run downloads the ISO and installs the viewer tools; booting can take several minutes.
+
+The virtual machine has its own 20 GB disk in `artifacts/codespace/`. Changes to an installed system stay there until you delete that disk or the Codespace. The live session resets when restarted. The Codespace needs at least 4 GB of memory.
+
 Get the bootable ISO from [Releases](https://github.com/Bobdahacker-official/AvalancheLinux/releases). Write it to a USB drive to start AvalancheLinux and install it on your computer.
 
 - **avalanche-core** includes Avalanche Center, Software, Updates, Settings, the desktop session, and the `avalanche` command.
