@@ -25,15 +25,14 @@ This is an in-memory system. Files disappear when powered off. There is no disk 
 
 ## Download source archive
 
-The complete source archive is split into three parts to fit GitHub's file limit. Download all three `RawLinux-1.0-source.tar.gz.part-*` files to the same directory, then join and extract them:
+`RawLinux-1.0-source.tar.gz` is one complete archive, stored with Git LFS to support its size. Use the file's Download button on GitHub, or clone this branch with Git LFS installed and run `git lfs pull`.
 
 ```sh
-cat RawLinux-1.0-source.tar.gz.part-* > RawLinux-1.0-source.tar.gz
 sha256sum -c SOURCE-SHA256SUMS
 tar -xzf RawLinux-1.0-source.tar.gz
 ```
 
-`SHA256SUMS` verifies the individual files in this folder.
+`SHA256SUMS` verifies the files in this folder.
 
 ## Rebuild
 
